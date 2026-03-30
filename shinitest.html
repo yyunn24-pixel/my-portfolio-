@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BGM心理診断ポータル Complete</title>
+    <style>
+        :root {
+            --primary-color: #779ecb;
+            --mote-color: #ff6b6b;
+            --magic-color: #ccff00;
+            --treasure-color: #d32f2f;
+            --dream-color: #5a67d8;
+            --bg-color: #f0f4f8;
+        }
+
+
+
+        body {
+            font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', Meiryo, sans-serif;
+            background-color: var(--bg-color);
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+            max-width: 650px;
+            margin: 0 auto;
+            transition: background-color 0.5s;
+            /* イントロ中はスクロールさせない */
+            overflow: hidden; 
+        }
+
+        /* --- 追加：イントロダクション画面のスタイル --- */
+        #intro-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            transition: opacity 1s ease, transform 1s ease;
+        }
+
+        /* 背景のCanvas */
+        #particle-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+
+        .intro-content {
+            z-index: 1;
+            text-align: center;
+            max-width: 80%;
+            opacity: 0; /* 最初は隠してJSで表示 */
+            transform: translateY(20px);
+            transition: all 1s ease;
+        }
+
+        .intro-title {
+            font-size: 2rem;
+            margin-bottom: 2rem;
+            letter-spacing: 0.2em;
+            text-shadow: 0 0 10px rgba(119, 158, 203, 0.8);
+            border-bottom: 1px solid rgba(255,255,255,0.3);
+            display: inline-block;
+            padding-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .disclaimer-box {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            margin-bottom: 30px;
+            font-family: "Courier New", monospace;
+            min-height: 140px; /* 高さを確保 */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .typing-text {
+            font-size: 0.95rem;
+            line-height: 1.8;
+            color: #ddd;
+            white-space: pre-wrap; /* 改行を反映 */
+        }
+
+        .start-btn {
+            background: transparent;
+            color: #fff;
+            border: 1px solid #fff;
+            padding: 15px 40px;
+            font-size: 1.1rem;
+            letter-spacing: 0.1em;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+            opacity: 0; /* 最初は隠す */
+        }
+
+        .start-btn:hover {
+            background: #fff;
+            color: #000;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+        }
+
+        /* スキップ説明テキストのスタイル */
+        .skip-hint {
+            margin-top: 15px;
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.5);
+            letter-spacing: 0.05em;
+        }
+
+        .hidden-fade {
+            opacity: 0;
+            pointer-events: none;
+            transform: scale(1.1);
+        }
+
+        /* コンテナの初期状態（イントロ後に表示） */
+        .container {
+            background: #fff;
+            padding: 30px;
+            border-radius: 25px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            min-height: 400px;
+            transition: all 0.5s;
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        
+        .container.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* --- ここから下は元のCSS --- */
+
+        /* モード別背景 */
+        body.magic-mode { background-color: #1a1a2e; color: #eee; }
+        body.treasure-mode { background-color: #f0f2f5; }
+        body.dream-mode { background-color: #f0f2f5; }
+
+        .magic-mode .container { background-color: #16213e; color: #eee; border: 1px solid #4831d4; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+
+        h1 { text-align: center; color: #5d5d5d; font-size: 1.5em; margin-bottom: 25px; }
+        .magic-mode h1 { color: var(--magic-color); text-shadow: 0 0 10px rgba(204, 255, 0, 0.5); }
+        .treasure-mode h1.t-title { color: var(--treasure-color); border-bottom: 3px double var(--treasure-color); padding-bottom: 10px; }
+        .dream-mode h1.d-title { color: var(--dream-color); }
+
+        /* メインメニュー */
+        #main-menu { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        @media (max-width: 480px) { #main-menu { grid-template-columns: 1fr; } }
+        
+        .menu-btn {
+            padding: 15px; font-size: 0.95em; font-weight: bold; border: none; border-radius: 15px;
+            cursor: pointer; transition: 0.3s; color: white; text-align: center;
+            display: flex; align-items: center; justify-content: center; min-height: 70px;
+        }
+        .menu-btn:hover { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
+        .btn-real { background-color: var(--primary-color); }
+        .btn-mote { background-color: var(--mote-color); }
+        .btn-magic { background-color: #4831d4; }
+        .btn-treasure { background-color: var(--treasure-color); }
+        .btn-dream { background-color: var(--dream-color); }
+
+        /* 共通設定 */
+        .hidden { display: none; }
+        .btn-action {
+            background-color: var(--primary-color); color: white; border: none;
+            padding: 12px 30px; font-size: 1em; border-radius: 25px; cursor: pointer; width: 100%; margin-top: 15px;
+        }
+
+        /* 入力フォーム共通 */
+        input[type="text"], input[type="number"] { width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; box-sizing: border-box; margin-bottom: 10px; font-size: 1rem; }
+        .input-group { text-align: left; margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 0.9rem; }
+
+        /* 選択肢ボタン共通 */
+        .options { display: flex; flex-direction: column; gap: 12px; }
+        .opt-btn {
+            border: 2px solid #eee; background: #fff; padding: 15px; border-radius: 15px;
+            cursor: pointer; transition: 0.2s; font-weight: bold; text-align: left; font-size: 0.95em;
+        }
+        .opt-btn:hover { transform: scale(1.02); background: #fdfbf7; }
+
+        /* 結果表示エリア共通 */
+        .result-card { padding: 20px; border-radius: 20px; border: 2px solid #ddd; margin-top: 20px; animation: slideUp 0.5s ease; text-align: center; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .result-title { display: block; font-size: 1.25em; font-weight: bold; margin-bottom: 15px; }
+
+        /* 各診断の特有スタイル */
+        .real-feedback { background: #fff3f3; padding: 20px; border-radius: 10px; border-left: 5px solid #ff6b6b; margin-top: 20px; color: #333; text-align: left; }
+        .user-ans { font-style: italic; color: #888; text-decoration: underline; }
+        
+        .magic-mode .opt-btn { background-color: #0f3460; border-color: #4831d4; color: #fff; }
+        .magic-card { border-color: var(--magic-color); background: linear-gradient(145deg, #16213e, #0f3460); color: #fff; }
+        .magic-mode .result-title { color: var(--magic-color); }
+
+        .treasure-card { border-color: var(--treasure-color); }
+        .treasure-mode .result-title { color: var(--treasure-color); }
+
+        .dream-text-box { background: #fffaf0; padding: 15px; border-radius: 10px; border-left: 5px solid #ed8936; text-align: left; color: #333; }
+        .dream-card { border-color: var(--dream-color); }
+
+        .back-to-menu { display: block; margin: 20px auto 0; background: none; border: none; color: #999; text-decoration: underline; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+<div id="intro-overlay">
+    <canvas id="particle-canvas"></canvas>
+    <div class="intro-content">
+        <h1 class="intro-title">PSYCHOLOGY PORTAL</h1>
+        <div class="disclaimer-box">
+            <p id="typewriter-text" class="typing-text"></p>
+        </div>
+        <button id="start-btn" class="start-btn" onclick="enterApp()">DIAGNOSIS START</button>
+        <p class="skip-hint">（Enterキーでスキップ）</p>
+    </div>
+</div>
+
+<div class="container" id="main-container">
+    <div id="main-menu">
+        <h1 style="grid-column: 1 / -1; margin-bottom: 10px;">✨ BGM診断ポータル ✨</h1>
+        <button class="menu-btn btn-real" onclick="startApp('real')">衝撃の<br>リアル診断</button>
+        <button class="menu-btn btn-mote" onclick="startApp('mote')">裏・モテ属性<br>診断</button>
+        <button class="menu-btn btn-magic" onclick="startApp('magic')">魔法の杖<br>診断</button>
+        <button class="menu-btn btn-treasure" onclick="startApp('treasure')">お宝奪取<br>の危機！</button>
+        <button class="menu-btn btn-dream" onclick="startApp('dream')" style="grid-column: 1 / -1;">🌙 夢の心理テスト</button>
+    </div>
+
+    <div id="real-app" class="hidden app-section">
+        <h1 style="color: var(--primary-color);">衝撃のリアル診断</h1>
+        <div id="real-steps">
+            <div id="r-step1" class="step">
+                <p>Q1. あなたに水がかかりました。それは体のどこですか？</p>
+                <input type="text" id="rq1" placeholder="例：顔、肩、上半身など">
+                <button class="btn-action" onclick="submitReal(1)">回答を確定する</button>
+                <div id="rfb1" class="real-feedback hidden">
+                    <b>【診断：自慢のパーツ】</b><br>「<span class="user-ans" id="rval1"></span>」がかかったあなた。そこはあなたが無意識に<b>「自分自身で最も自信を持っている、あるいは他人に見せびらかしたいパーツ」</b>です。<br></br><br>顔・頭（「私が主役」のセンター級）
+「世界は私を見るために回っている」。</br><br>手・腕（「職人肌のナルシスト」級）「この手で未来を掴む（ついでに見せびらかす）」。</br><br>足・脚（「歩く美学」のモデル級）、自分のフットワークの軽さ、あるいは脚のラインに絶対的な自信があるタイプ。</br><br>胸・お腹（「全人類の母・父」級、自分の「存在感」そのものに自信があるタイプ。</br><br>お尻・背中（「振り返れば奴がいる」級）
+「背中で語る、孤独なカリスマ」。</br>
+                    <button class="btn-action" onclick="nextReal(2)">次の質問へ →</button>
+                </div>
+            </div>
+            <div id="r-step2" class="step hidden">
+                <p>Q2. 水がいつの間にか黒くなっていました。どれくらい黒いですか？</p>
+                <input type="text" id="rq2" placeholder="例：真っ黒、うっすら濁っている程度など">
+                <button class="btn-action" onclick="submitReal(2)">回答を確定する</button>
+                <div id="rfb2" class="real-feedback hidden">
+                    <b>【診断：腹黒さ】</b><br>黒さは「<span class="user-ans" id="rval2"></span>」ですね。それは、あなたの<b>「腹黒さ・心の闇」</b>そのもの。<br></br><br>ほんのりグレー（ごま塩おにぎり級）
+「世渡り上手な、可愛い小悪魔」。あなたの腹黒さは、まだ「隠し味」程度。たまに「あ、今の自分、性格悪いかも♡」と自覚して楽しむ余裕があります。飲み会で嫌いな人の話を笑顔で聞き流しながら、心の中でそっと「バカだなぁ」と呟くくらい。
+
+闇の正体: 「自分だけは得をしたい」という、人間らしいピュア（？）な欲望です。</br><br>書道液くらい真っ黒（プロの策士級）「笑顔の裏に、国家機密あり」。あなたの笑顔は、もはや「攻撃のための防具」。相手を油断させておいて、最後には自分の思い通りの着地点に誘導するプロの仕業です。友達からは「優しいね」と言われることが多いですが、実は頭の中で常に「損得勘定のそろばん」を弾いていませんか？</br><br>光さえ吸い込む深海（魔王の右腕級）「腹黒すぎて、もはや聖人に見える」。その水、光を一切反射していませんね。あなたの闇は深すぎて、一周回って「慈悲深い人」に見えるレベルです。誰もがあなたの手のひらの上で踊らされており、もはや誰もあなたを「黒い」と指摘することすらできません。だって、指摘した瞬間に消されそうですから。</br>
+<br>透明　透明に見えるけど、実は猛毒（サイコパス・プリンス級）
+「黒くない？…それ、一番怖いやつです」 「水は透明なままです」と答えたあなた。一見、純粋無垢に見えますが、実はそれが一番の闇かもしれません。「自分は白だ」と思い込んでいるその無自覚さこそが、最強の腹黒さ。自覚がないままに周囲を翻弄し、最後には自分だけが生き残るタイプです。
+
+闇の正体: 「自分は絶対に正しい」という、ダイヤモンドより硬い自己肯定感。</br>
+                    <button class="btn-action" onclick="nextReal(3)">次の質問へ →</button>
+                </div>
+            </div>
+            <div id="r-step3" class="step hidden">
+                <p>Q3. 魔法で足が速くなりました。100mを何秒で走れますか？</p>
+                <input type="text" id="rq3" placeholder="例：1秒、5秒など">
+                <button class="btn-action" onclick="submitReal(3)">回答を確定する</button>
+                <div id="rfb3" class="real-feedback hidden">
+                    <b>【診断：一目惚れの速度】</b><br>「<span class="user-ans" id="rval3"></span>」！ それは、あなたが<b>「異性に一目惚れして沼に落ちるまでの時間」</b>です。<br>秒速で駆け抜けたあなたは、もはや誰とすれ違っても恋に落ちる体質です。</br>
+                    <button class="btn-action" onclick="nextReal(4)">次の質問へ →</button>
+                </div>
+            </div>
+            <div id="r-step4" class="step hidden">
+                <p>Q4. あなたの前に大きなお城があります。窓はいくつありますか？</p>
+                <input type="text" id="rq4" placeholder="例：3個、100個など">
+                <button class="btn-action" onclick="submitReal(4)">回答を確定する</button>
+                <div id="rfb4" class="real-feedback hidden">
+                    <b>【診断：ナルシスト度】</b><br>窓の数は「<span class="user-ans" id="rval4"></span>」個。この数は、あなたの<b>「ナルシスト度」</b>を表しています。<br></br><br>窓が 1〜3個（謙虚すぎる仙人級）。「鏡、持ってますか？」 あなたのナルシスト度は、もはや絶滅危惧種レベルの低さです。自分をアピールすることに無頓着すぎて、窓が少なすぎてお城の中が真っ暗かもしれません。</br><br>窓が 10〜20個（自撮り1日3回級）。世界は私を引き立てる背景である」 標準的なナルシスト度です。自分のことは大好きだし、ショーウィンドウに映る自分の姿はしっかりチェックするタイプ。でも、他人の反応も気にする「バランス型の自信家」です。</br>
+                    <br>窓が 100個以上（全方位クリスタルパレス級）
+「もはやお城自体が鏡」 窓の数が多すぎて、もはや壁がありません。どこを向いても自分、上を見ても下を見ても自分。あなたが歩けばそこがランウェイ、あなたが喋ればそこが記者会見場です。ナルシスト度1000%！もはや「自分が好き」という次元を超えて、自分が「自然現象（太陽とか）」だと思っている節があります。</br><br>窓が 0個（要塞・引きこもり級）
+「私の美学は、誰にも見せない」 ナルシスト度、測定不能！あるいは、究極の「隠れナルシスト」かもしれません。自分のこだわりが強すぎて、他人からの評価なんて一切シャットアウト。「私を理解できるのは私だけ」という、ある意味一番カッコいい（？）孤高のタイプです。</br>
+
+<br>アドバイス: たまには小窓を一つ作って、下界の民にその素晴らしい美学をチラ見せしてあげてください。</br>
+                    <button class="btn-action" onclick="resetAll()">トップに戻る</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="mote-app" class="hidden app-section">
+        <h1 style="color: var(--mote-color);">裏・モテ属性診断</h1>
+        <div id="mote-quiz">
+            <p style="text-align:center;">クローゼットからつい手に取ってしまう<br><strong>セーターの色</strong>はどれ？</p>
+            <div class="options">
+                <button class="opt-btn" onclick="showMoteResult('A')">A：水色</button>
+                <button class="opt-btn" onclick="showMoteResult('B')">B：赤色</button>
+                <button class="opt-btn" onclick="showMoteResult('C')">C：紺色</button>
+                <button class="opt-btn" onclick="showMoteResult('D')">D：黄色</button>
+            </div>
+        </div>
+        <div id="mote-res" class="hidden result-card mote-card" style="border-color: var(--mote-color);">
+            <span class="result-title" id="mote-res-title" style="color: var(--mote-color);"></span>
+            <p id="mote-res-desc" style="text-align: left;"></p>
+            <div style="background:#fff; padding:10px; border-left:4px solid var(--mote-color); margin-top:10px; text-align: left;">
+                <small>【さらにモテるための迷言】</small><br><i id="mote-res-meigen"></i>
+            </div>
+            <button class="btn-action" onclick="resetAll()" style="background-color: var(--mote-color);">トップに戻る</button>
+        </div>
+    </div>
+
+    <div id="magic-app" class="hidden app-section">
+        <h1>魔法の杖、一度の使い道</h1>
+        <div id="magic-quiz">
+            <p style="text-align: left;">
+                あなたの手元に、たった一度だけ魔法が使える杖があります。ただし、この魔法は「他人のためにしか使えない」というルールがあります。<br><br>
+                あなたは、「誰に、どんな魔法」をかけてあげますか？
+            </p>
+            <div class="options">
+                <button class="opt-btn" onclick="showMagicResult(1)">1. 親友や家族を「一生宝くじが当たり続ける体質」にする</button>
+                <button class="opt-btn" onclick="showMagicResult(2)">2. 嫌いな奴の「鼻毛が切っても1分で元通りになる魔法」をかける</button>
+                <button class="opt-btn" onclick="showMagicResult(3)">3. 推しに「私を1日5分だけ思い出させる魔法」をかける</button>
+                <button class="opt-btn" onclick="showMagicResult(4)">4. 世界中の食べ物を「食べても太らない物質」に変える</button>
+            </div>
+        </div>
+        <div id="magic-res" class="hidden result-card magic-card">
+            <span class="result-title" id="magic-res-title"></span>
+            <p id="magic-res-desc" style="background: rgba(0,0,0,0.3); padding:15px; border-radius:10px; text-align: left;"></p>
+            <button class="btn-action" onclick="resetAll()" style="background-color: #4831d4;">トップに戻る</button>
+        </div>
+    </div>
+
+    <div id="treasure-app" class="hidden app-section">
+        <h1 class="t-title">欲しかったお宝、奪取の危機！</h1>
+        <div id="treasure-quiz">
+            <p>喉から手が出るほど欲しかった伝説の限定品を手に入れたあなた。友人から「譲ってくれ！」と詰め寄られ、取った斜め上すぎる行動は？</p>
+            <div class="options">
+                <button class="opt-btn" onclick="showTreasureResult(1)">1. 「いいよ、その代わり一生私のパシリね」と、契約書を書かせる。</button>
+                <button class="opt-btn" onclick="showTreasureResult(2)">2. 「これは私の魂の欠片なんだ…」と、30分間ポエムを聞かせる。</button>
+                <button class="opt-btn" onclick="showTreasureResult(3)">3. 「わかった。じゃあ、あっちの川まで競走だ！」と、勝負を挑む。</button>
+                <button class="opt-btn" onclick="showTreasureResult(4)">4. ……（無言で、目の前で開封して使い始める）</button>
+            </div>
+        </div>
+        <div id="treasure-res" class="hidden result-card treasure-card">
+            <span class="result-title" id="treasure-res-title"></span>
+            <p id="treasure-res-desc" style="text-align: left;"></p>
+            <button class="btn-action" onclick="resetAll()" style="background-color: var(--treasure-color);">トップに戻る</button>
+        </div>
+    </div>
+
+    <div id="dream-app" class="hidden app-section">
+        <h1 class="d-title">🌙 夢の心理テスト</h1>
+        <div id="dream-quiz">
+            <p>夢の中であなたは目が覚めました。郵便受けを見ると、手紙が入っています。</p>
+            <div class="input-group">
+                <label for="d-count">Q1. 手紙は何通入っていましたか？</label>
+                <input type="number" id="d-count" placeholder="例: 3">
+            </div>
+            <div class="input-group">
+                <label for="d-sender">Q2. 差出人は誰でしたか？</label>
+                <input type="text" id="d-sender" placeholder="例: 昔の友人、会社の人など">
+            </div>
+            <button class="btn-action" onclick="showDreamResult()" style="background-color: var(--dream-color);">結果を見る</button>
+        </div>
+        <div id="dream-res" class="hidden result-card dream-card">
+            <span class="result-title" style="color: #e53e3e;">【診断結果】</span>
+            <div class="dream-text-box">
+                手紙の数は、あなたが今抱えている<br>
+                <strong>「悩みの数（<span id="dr-count"></span>つ）」</strong>を表しています。<br><br>
+                そして差出人の<strong>「<span id="dr-sender"></span>」</strong>は、<br>
+                その悩みに関係している人物、あるいは象徴です。<br></br><br>0通（悩みゼロ・悟りを開いた仏級） 「悩み？美味しいのそれ？」状態です。郵便受けが空っぽなのは、あなたの脳内が超スッキリ晴れ渡っている証拠。悩みがないことが悩み、という贅沢な次元にいます。<br></br><br>1〜3通（人間味あふれる一般市民級）「今日の晩ごはん何にしよう」から「老後の貯金」まで、非常に健全な悩みの数です。</br><br>生活にほどよいスパイス（悩み）があって、一番人間らしくて安心できるレベル。</br>
+
+<br>1通だけなら、それは悩みというより「ただの光熱費の請求書」だと思って捨てちゃいましょう！</br><br>10通以上（お悩みデパート・大繁盛級） 郵便受けがパンパンです！あなたは今、人生の繁忙期を迎えていますね。あれもこれもと責任感が強すぎて、他人の悩みまで自分の郵便受けに入れちゃっていませんか？</br>
+            </div>
+            <button class="btn-action" onclick="resetAll()" style="background-color: var(--dream-color);">トップに戻る</button>
+        </div>
+    </div>
+
+    <button class="back-to-menu hidden" id="global-back" onclick="resetAll()">メニューへ戻る</button>
+</div>
+
+<button class="back-to-menu hidden" id="global-back" onclick="resetAll()">メニューへ戻る</button>
+
+<a href="index.html" id="exit-app" style="display: block; text-align: center; margin-top: 30px; color: #779ecb; text-decoration: none; font-size: 0.9rem;">
+  ← ポートフォリオに戻る
+</a>
+
+<script>
+    // --- 追加：イントロダクション演出用のスクリプト ---
+
+    // 1. パーティクルエフェクト (Canvas)
+    const canvas = document.getElementById('particle-canvas');
+    const ctx = canvas.getContext('2d');
+    let particlesArray;
+
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    class Particle {
+        constructor() {
+            this.x = Math.random() * canvas.width;
+            this.y = Math.random() * canvas.height;
+            this.size = Math.random() * 2 + 0.1; // 粒子のサイズ
+            this.speedX = (Math.random() * 1.5 - 0.75); // 横の動き
+            this.speedY = (Math.random() * 1.5 - 0.75); // 縦の動き
+            this.opacity = Math.random() * 0.5 + 0.1; // 透明度
+        }
+        update() {
+            this.x += this.speedX;
+            this.y += this.speedY;
+            if (this.x > canvas.width || this.x < 0) this.speedX = -this.speedX;
+            if (this.y > canvas.height || this.y < 0) this.speedY = -this.speedY;
+        }
+        draw() {
+            ctx.fillStyle = `rgba(173, 216, 230, ${this.opacity})`; // 水色っぽい粒子
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+            ctx.fill();
+        }
+    }
+
+    function initParticles() {
+        particlesArray = [];
+        for (let i = 0; i < 100; i++) { // 粒子の数
+            particlesArray.push(new Particle());
+        }
+    }
+
+    function animateParticles() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        for (let i = 0; i < particlesArray.length; i++) {
+            particlesArray[i].update();
+            particlesArray[i].draw();
+        }
+        requestAnimationFrame(animateParticles);
+    }
+
+    // 画面リサイズ対応
+    window.addEventListener('resize', () => {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        initParticles();
+    });
+
+    // 2. タイプライター風テキスト演出
+    const textToType = [
+        "心理テストを始める前に",
+        "",
+        "※注意※",
+        "心理テストはより直感的に答えた方が良いとされてます。",
+        "内容を読んで理解した後10秒以内に答えを出してください。",
+"",
+        "当たると評判の心理テストを集めました",
+        "しかし、科学的根拠は全くないので軽い遊のようなものです",
+"",
+        "結果が外れていたら？",
+        "それはあなたの心が高尚で心理テストごときには計り知れないせいでしょう",
+        "",
+        "テストを始めましょう"
+    ];
+
+    let lineIndex = 0;
+    let charIndex = 0;
+    const speed = 40; // タイピング速度
+    const typeWriterElement = document.getElementById('typewriter-text');
+    const startBtn = document.getElementById('start-btn');
+    const introContent = document.querySelector('.intro-content');
+
+    // タイムアウトIDを管理する変数を追加
+    let typeTimer;
+
+    function typeWriter() {
+        if (lineIndex < textToType.length) {
+            if (charIndex < textToType[lineIndex].length) {
+                typeWriterElement.innerHTML += textToType[lineIndex].charAt(charIndex);
+                charIndex++;
+                typeTimer = setTimeout(typeWriter, speed);
+            } else {
+                typeWriterElement.innerHTML += "<br>";
+                lineIndex++;
+                charIndex = 0;
+                typeTimer = setTimeout(typeWriter, 200); // 行間のウェイト
+            }
+        } else {
+            // 全て表示し終わったらボタンを表示
+            startBtn.style.opacity = "1";
+        }
+    }
+
+    // ページ読み込み時の初期化処理
+    window.onload = function() {
+        initParticles();
+        animateParticles();
+        
+        // 少し待ってからコンテンツを表示開始
+        setTimeout(() => {
+            introContent.style.opacity = "1";
+            introContent.style.transform = "translateY(0)";
+            typeWriter();
+        }, 500);
+    };
+
+    // 3. アプリ開始処理
+    function enterApp() {
+        // タイプライターが途中でも停止する
+        if(typeTimer) clearTimeout(typeTimer);
+
+        const overlay = document.getElementById('intro-overlay');
+        const container = document.getElementById('main-container');
+
+        // オーバーレイをフェードアウト
+        overlay.classList.add('hidden-fade');
+        
+        // 本体をスクロール可能に戻す
+        document.body.style.overflow = "auto";
+
+        // メインコンテナをフェードイン
+        setTimeout(() => {
+            container.classList.add('visible');
+            overlay.style.display = 'none'; // 完全に消す
+        }, 800);
+    }
+
+    // --- Enterキーでスキップする処理 ---
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Enter') {
+            const overlay = document.getElementById('intro-overlay');
+            // イントロが表示中（まだ消えていない）場合にのみ実行
+            if (overlay && !overlay.classList.contains('hidden-fade')) {
+                enterApp();
+            }
+        }
+    });
+
+
+    // --- 以下、既存のロジック ---
+
+    function startApp(app) {
+        // 全ての診断セクションを一度隠す
+        const sections = document.querySelectorAll('.app-section');
+        sections.forEach(s => s.classList.add('hidden'));
+        
+        // メインメニューを隠し、戻るボタンを表示
+        document.getElementById('main-menu').classList.add('hidden');
+        document.getElementById('global-back').classList.remove('hidden');
+
+        // 背景モードのリセット
+        document.body.classList.remove('magic-mode', 'treasure-mode', 'dream-mode');
+
+        // 選択された診断だけを表示
+        if(app === 'real') document.getElementById('real-app').classList.remove('hidden');
+        if(app === 'mote') document.getElementById('mote-app').classList.remove('hidden');
+        if(app === 'magic') { 
+            document.getElementById('magic-app').classList.remove('hidden'); 
+            document.body.classList.add('magic-mode'); 
+        }
+        if(app === 'treasure') { 
+            document.getElementById('treasure-app').classList.remove('hidden'); 
+            document.body.classList.add('treasure-mode'); 
+        }
+        if(app === 'dream') { 
+            document.getElementById('dream-app').classList.remove('hidden'); 
+            document.body.classList.add('dream-mode'); 
+        }
+    }
+
+    // 1. リアル診断
+    function submitReal(n) {
+        const val = document.getElementById('rq'+n).value || "秘密";
+        document.getElementById('rval'+n).innerText = val;
+        document.getElementById('rq'+n).classList.add('hidden');
+        document.querySelectorAll(`#r-step${n} .btn-action`)[0].classList.add('hidden');
+        document.getElementById('rfb'+n).classList.remove('hidden');
+    }
+    function nextReal(n) {
+        document.getElementById('r-step'+(n-1)).classList.add('hidden');
+        document.getElementById('r-step'+n).classList.remove('hidden');
+    }
+
+    // 2. モテ診断
+    const moteData = {
+        'A': { t: "氷の微笑・マイペースの女王/王", s: "70%", d: "話しやすさは抜群ですが、中身はガチガチの頑固者。自分のルールを1ミリも崩さない姿に、異性は「あ、この人、地雷を踏んだら一瞬で消されるな」と野生の勘で察しています。", m: "「〇〇君のそういう適当なところ、逆に才能だよね！」と、褒めているのか貶しているのか分からない高度なテクニックを使いましょう。" },
+        'B': { t: "熱血！学級委員長タイプ", s: "55%", d: "「普通こうでしょ！」が口癖のあなた。異性とデートしていても、いつの間にか反省会に発展しがち。相手が「あ、この人と結婚したら毎日怒られるんだな」と未来を予知して震えています。", m: "まずは相手の意見を一旦受け入れるふりをして、「なるほど、あなたのそのクズみたいな意見も一理あるわね」と、トゲを隠さないスタイルでいきましょう。" },
+        'C': { t: "構ってちゃん・モンスター", s: "95%", d: "圧倒的なオーラで人を惹きつけますが、中身は『24時間私のことだけ考えて！』という超重量級の寂しがり屋。あなたの『甘え』は、もはや『捕食』に近いレベルです。", m: "「なんで会えないの」ではなく、「死ぬ気で頑張ってる君の姿、1km先から望遠鏡で見てるね」と、ホラーの一歩手前で相手を励ましましょう。" },
+        'D': { t: "沈黙のトリックスター", s: "30%", d: "自分から動かず、背景に溶け込むプロ。しかし一度口を開くと、誰にも理解できないギャップをぶちかまして相手を脳内フリーズさせます。一部のマニアには神格化されます。", m: "挨拶すら苦手なあなたは、すれ違いざまに「……フフッ」とだけ笑って去りましょう。相手は『今のは恋の予感？呪い？』と一生忘れられなくなります。" }
+    };
+    function showMoteResult(id) {
+        document.getElementById('mote-quiz').classList.add('hidden');
+        document.getElementById('mote-res').classList.remove('hidden');
+        document.getElementById('mote-res-title').innerText = "あなたは… " + moteData[id].t + " (モテ度：" + moteData[id].s + ")";
+        document.getElementById('mote-res-desc').innerText = moteData[id].d;
+        document.getElementById('mote-res-meigen').innerText = moteData[id].m;
+    }
+
+    // 3. 魔法診断
+    const magicData = {
+        1: { t: "ATM扱い・現実主義者 100%", d: "精神年齢45歳。利他性というより「身内が金持ちになれば、自分もおこぼれをもらえる」という、非常に賢明かつ狡猾な思考の持ち主です。あなたの優しさは、しっかり「利子」を計算に入れた投資型と言えるでしょう。" },
+        2: { t: "粘着質な復讐の鬼 200%", d: "精神年齢10歳。世界平和よりも「ムカつく奴の地味な不便」を優先する、非常に人間臭い心の持ち主です。鼻毛という嫌な攻撃を選ぶあたり、あなたは『一生消えない小さなイライラ』を刻む天才かもしれません。" },
+        3: { t: "独占欲の塊・暴走機関車 500%", d: "精神年齢14歳。他人のために杖を使うフリをして、しっかり自分へのメリットをねじ込む強欲な思春期。推しの幸せを願っているようでいて、実は『推しを支配したい』という野望が見え隠れしています。愛が重すぎます。" },
+        4: { t: "全人類の救世主（デブ活担当） 120%", d: "精神年齢80歳。社会問題よりも『食』の欲求を最優先する、ある意味で最も博愛主義な人です。あなたの魔法のせいで、人類は運動をやめ、世界はぷよぷよした平和に包まれることでしょう。" }
+    };
+    function showMagicResult(n) {
+        document.getElementById('magic-quiz').classList.add('hidden');
+        document.getElementById('magic-res').classList.remove('hidden');
+        document.getElementById('magic-res-title').innerText = "診断結果：" + magicData[n].t;
+        document.getElementById('magic-res-desc').innerText = magicData[n].d;
+    }
+
+    // 4. お宝診断
+    const treasureData = {
+        1: { t: "1を選んだあなたは…「腹黒・策士度 100%」", d: "人との繋がりを大切にするどころか、「人脈は利用するもの」と考えている節があります。精神年齢は、酸いも甘いも噛み分けた50歳（政治家クラス）。一見優しそうに見えて、実は一番恐ろしいタイプです。" },
+        2: { t: "2を選んだあなたは…「自分に酔いすぎ度 200%」", d: "精神年齢は、自分探し真っ最中の14歳（中学2年生）。モノを譲る・譲らない以前に、自分の世界に入り込みすぎて周りを置いてけぼりにします。友人は「いいから早くYESかNOか言ってくれ」と心の中で叫んでいます。" },
+        3: { t: "3を選んだあなたは…「わんぱく少年・少女度 120%」", d: "精神年齢は、元気いっぱいの8歳。何でも遊びに変換できる天才ですが、友人は「いや、普通に話し合いたいんだけど……」と困惑しています。一生サンダルで走り回っていそうな、無邪気すぎる心の持ち主です。" },
+        4: { t: "4を選んだあなたは…「鋼のメンタル・独裁者度 500%」", d: "精神年齢は、イヤイヤ期を極めた2歳。あるいは、全てを悟った100歳。言葉によるコミュニケーションを放棄し、行動で「これは俺のや！」と示していくスタイルです。ある意味、最も自分に正直で清々しい人です。" }
+    };
+    function showTreasureResult(n) {
+        document.getElementById('treasure-quiz').classList.add('hidden');
+        document.getElementById('treasure-res').classList.remove('hidden');
+        document.getElementById('treasure-res-title').innerText = treasureData[n].t;
+        document.getElementById('treasure-res-desc').innerText = treasureData[n].d;
+    }
+
+    // 5. 夢の診断
+    function showDreamResult() {
+        const c = document.getElementById('d-count').value;
+        const s = document.getElementById('d-sender').value;
+        if (!c || !s) { alert('すべての項目を入力してください'); return; }
+        document.getElementById('dr-count').innerText = c;
+        document.getElementById('dr-sender').innerText = s;
+        document.getElementById('dream-quiz').classList.add('hidden');
+        document.getElementById('dream-res').classList.remove('hidden');
+    }
+
+    // リセット関数（全リロードではなく、メニューに戻って状態を初期化する）
+    function resetAll() {
+        // 全ての診断セクションを隠す
+        document.querySelectorAll('.app-section').forEach(s => s.classList.add('hidden'));
+        
+        // メインメニューを表示
+        document.getElementById('main-menu').classList.remove('hidden');
+        
+        // 「メニューへ戻る」ボタンを隠す
+        document.getElementById('global-back').classList.add('hidden');
+        
+        // 背景モードのリセット
+        document.body.classList.remove('magic-mode', 'treasure-mode', 'dream-mode');
+        
+        // --- 各診断の内部状態をリセット ---
+        
+        // 入力欄のクリア
+        document.querySelectorAll('input').forEach(i => i.value = '');
+        
+        // 1. リアル診断のリセット
+        document.querySelectorAll('#real-steps .step').forEach(s => s.classList.add('hidden')); // 全ステップ隠す
+        document.getElementById('r-step1').classList.remove('hidden'); // ステップ1だけ出す
+        document.querySelectorAll('.real-feedback').forEach(f => f.classList.add('hidden')); // 結果隠す
+        document.querySelectorAll('#real-steps .btn-action').forEach(b => b.classList.remove('hidden')); // ボタン再表示
+        document.querySelectorAll('#real-steps input').forEach(i => i.classList.remove('hidden')); // 入力欄再表示
+
+        // 2. モテ診断のリセット
+        document.getElementById('mote-quiz').classList.remove('hidden');
+        document.getElementById('mote-res').classList.add('hidden');
+
+        // 3. 魔法診断のリセット
+        document.getElementById('magic-quiz').classList.remove('hidden');
+        document.getElementById('magic-res').classList.add('hidden');
+
+        // 4. お宝診断のリセット
+        document.getElementById('treasure-quiz').classList.remove('hidden');
+        document.getElementById('treasure-res').classList.add('hidden');
+
+        // 5. 夢診断のリセット
+        document.getElementById('dream-quiz').classList.remove('hidden');
+        document.getElementById('dream-res').classList.add('hidden');
+    }
+
+    
+</script>
+
+</body>
+</html>

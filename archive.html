@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>作品アーカイブ | Atelier MoRITA</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* 基本スタイル */
+        body {
+            font-family: 'Noto Sans JP', sans-serif;
+            line-height: 1.6;
+            color: #4a4a4a;
+            background-color: #faf7f2;
+            margin: 0;
+            padding: 0;
+        }
+        header { background: #fff; padding: 20px 0; border-bottom: 1px solid #eee; }
+        .header-inner { max-width: 1000px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; padding: 0 20px; }
+        .container { max-width: 1000px; margin: 0 auto; padding: 40px 20px; }
+        
+        /* アーカイブグリッド */
+        .archive-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+        }
+        .archive-item {
+            background: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            overflow: hidden;
+        }
+        .zoom-img { cursor: pointer; transition: 0.3s; }
+        .zoom-img:hover { opacity: 0.8; }
+
+        /* トップへ戻るボタン */
+        #back-to-top {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 50px;
+            height: 50px;
+            background-color: #f0ad4e; /* オレンジ */
+            color: white;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            display: none; /* 最初は隠す */
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        /* モーダル（画像拡大） */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 10000;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8);
+            justify-content: center;
+            align-items: center;
+        }
+        #modalImg { max-width: 90%; max-height: 90%; border-radius: 8px; }
+
+        footer { text-align: center; padding: 40px 0; color: #888; }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="header-inner">
+        <h1><a href="index.html" style="text-decoration: none; color: inherit;">Atelier MoRITA</a></h1>
+        <nav>
+            <ul style="list-style: none; display: flex; gap: 20px; margin: 0; padding: 0;">
+                <li><a href="index.html" style="text-decoration: none; color: #d4a373;">Top</a></li>
+                <li><a href="index.html#works" style="text-decoration: none; color: #d4a373;">Works</a></li>
+            </ul>
+        </nav>
+    </div>
+</header>
+
+<main class="container">
+  <section id="archive">
+    <h2 style="text-align: center; margin-bottom: 50px;">Training Project Archive</h2>
+    <p style="text-align: center; margin-bottom: 40px;">職業訓練のカリキュラム内で制作したデザイン・課題作品の一覧です。</p>
+
+   <div class="archive-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px;">
+  
+  <div class="archive-item" style="background: #fff; padding: 15px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); overflow: hidden;">
+    <p style="font-size: 0.7rem; color: #888; margin-bottom: 5px; text-align: right;">※画像タップで拡大</p>
+    <div style="display: flex; gap: 10px; margin-bottom: 15px; align-items: flex-start;">
+      <img src="beer-garden.jpg" alt="ビアガーデンチラシ" class="zoom-img" style="width: 50%; height: auto; border-radius: 4px; cursor: pointer; transition: 0.3s;">
+      <img src="hearing-sheet.jpg" alt="ヒアリングシート" class="zoom-img" style="width: 50%; height: auto; border-radius: 4px; border: 1px solid #eee; cursor: pointer; transition: 0.3s;">
+    </div>
+    <h3 style="font-size: 1rem; margin-bottom: 5px;">芝生でごろ寝ビアガーデン2026</h3>
+    <p style="font-size: 0.85rem; color: #666; margin-bottom: 8px;">Tool: Illustrator / Photoshop</p>
+    <p style="font-size: 0.8rem; color: #777; line-height: 1.5; border-top: 1px solid #eee; padding-top: 8px; margin-top: 8px;">
+      ヒアリングシートに基づき、ターゲットが「仕事帰りにリラックスできる」開放的な配色とレイアウトを意識して制作しました。フォントは手書き風を使用し、写真を配置してセリフ風の文字を散りばめました。
+    </p>
+  </div>
+
+  <div class="archive-item" style="background: #fff; padding: 15px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); overflow: hidden;">
+    <p style="font-size: 0.7rem; color: #888; margin-bottom: 5px; text-align: right;">※画像タップで拡大</p>
+    <div style="display: flex; gap: 10px; margin-bottom: 15px; align-items: flex-start;">
+      <img src="takaeda-hasami.jpg" alt="高枝切りハサミ" class="zoom-img" style="width: 100%; height: auto; border-radius: 4px; cursor: pointer; transition: 0.3s;">
+    </div>
+    <h3 style="font-size: 1rem; margin-bottom: 5px;">高枝切りハサミ楽天ショップバナー</h3>
+    <p style="font-size: 0.85rem; color: #666; margin-bottom: 8px;">Tool: Illustrator / Photoshop</p>
+    <p style="font-size: 0.8rem; color: #777; line-height: 1.5; border-top: 1px solid #eee; padding-top: 8px; margin-top: 8px;">
+      よく切れるというコンセプトで、上部に余白を大きく取り切れ味を表現しました。下には切った後の枝を積んで、沢山切った後だという印象を画像で表現しました。
+    </p>
+      </div>
+      
+      <div class="archive-item" style="background: #fff; padding: 15px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); overflow: hidden;">
+    <p style="font-size: 0.7rem; color: #888; margin-bottom: 5px; text-align: right;">※画像タップで拡大</p>
+    <div style="display: flex; gap: 10px; margin-bottom: 15px; align-items: flex-start;">
+      <img src="keiro.jpg" alt="地図作成" class="zoom-img" style="width: 100%; height: auto; border-radius: 4px; cursor: pointer; transition: 0.3s;">
+    </div>
+    <h3 style="font-size: 1rem; margin-bottom: 5px;">制作課題の訓練校までの地図</h3>
+    <p style="font-size: 0.85rem; color: #666; margin-bottom: 8px;">Tool: Photoshop</p>
+    <p style="font-size: 0.8rem; color: #777; line-height: 1.5; border-top: 1px solid #eee; padding-top: 8px; margin-top: 8px;">
+      目的は「迷わずたどり着く事」なので、目印となる建物は潰れる可能性が低い公共の建物をメインに配置。余計な色は使わずシンプルな配色を重視し、赤い矢印で経路を明示しました。
+    </p>
+  </div>
+
+        <div class="archive-item" style="background: #fff; padding: 15px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); overflow: hidden;">
+    <p style="font-size: 0.7rem; color: #888; margin-bottom: 5px; text-align: right;">※画像タップで拡大</p>
+    <div style="display: flex; gap: 10px; margin-bottom: 15px; align-items: flex-start;">
+      <img src="present.jpg" alt="プレゼント" class="zoom-img" style="width: 100%; height: auto; border-radius: 4px; cursor: pointer; transition: 0.3s;">
+    </div>
+    <h3 style="font-size: 1rem; margin-bottom: 5px;">楽天商品購入時のラッピングプレゼントバナー</h3>
+    <p style="font-size: 0.85rem; color: #666; margin-bottom: 8px;">Tool: Photoshop</p>
+    <p style="font-size: 0.8rem; color: #777; line-height: 1.5; border-top: 1px solid #eee; padding-top: 8px; margin-top: 8px;">
+      プラネタリウムを購入いただいたお客様へのラッピングプレゼントのバナーを作成しました。
+      北欧ニュアンスカラーで可愛い雰囲気を演出しました。
+    </p>
+  </div>
+
+         <div class="archive-item" style="background: #fff; padding: 15px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); overflow: hidden;">
+    <p style="font-size: 0.7rem; color: #888; margin-bottom: 5px; text-align: right;">※画像タップで拡大</p>
+    <div style="display: flex; gap: 10px; margin-bottom: 15px; align-items: flex-start;">
+      <img src="instagram feed.jpg" alt="インスタグラムフィード" class="zoom-img" style="width: 100%; height: auto; border-radius: 4px; cursor: pointer; transition: 0.3s;">
+    </div>
+    <h3 style="font-size: 1rem; margin-bottom: 5px;">Instagramでの塗装ブース販売フィードバナーを作成しました</h3>
+    <p style="font-size: 0.85rem; color: #666; margin-bottom: 8px;">Tool: Photoshop</p>
+    <p style="font-size: 0.8rem; color: #777; line-height: 1.5; border-top: 1px solid #eee; padding-top: 8px; margin-top: 8px;">
+      文字をでかでかと全面をおおうくらいの配置でインパクト重視のデザインにしました。
+      有害物質をすごい力で吸引している様子を風のエフェクトで表現しました。
+    </p>
+  </div>
+  
+           <div class="archive-item" style="background: #fff; padding: 15px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); overflow: hidden;">
+    <p style="font-size: 0.7rem; color: #888; margin-bottom: 5px; text-align: right;">※画像タップで拡大</p>
+    <div style="display: flex; gap: 10px; margin-bottom: 15px; align-items: flex-start;">
+      <img src="tosou.jpg" alt=""塗装ブース楽天" class="zoom-img" style="width: 100%; height: auto; border-radius: 4px; cursor: pointer; transition: 0.3s;">
+    </div>
+    <h3 style="font-size: 1rem; margin-bottom: 5px;">楽天の塗装ブース商品販売ページのバナー</h3>
+    <p style="font-size: 0.85rem; color: #666; margin-bottom: 8px;">Tool: Photoshop</p>
+    <p style="font-size: 0.8rem; color: #777; line-height: 1.5; border-top: 1px solid #eee; padding-top: 8px; margin-top: 8px;">
+      楽天の塗装ブース商品ページのバナーを作成しました。
+      良く吸引して空気を濾過してくれる様子を爽やかな印象の緑と青色メインの色合いで表現しました。
+      古臭くならないように、スライプの座布団を文字の背景に配置したり、三角や丸の図形をちりばめて弾むような雰囲気を出しました。
+    </p>
+  </div>
+
+
+<div class="archive-item" style="background: #fff; padding: 15px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); overflow: hidden;">
+  <p style="font-size: 0.7rem; color: #888; margin-bottom: 5px; text-align: right;">※画像タップで拡大</p>
+  
+  <div style="display: flex; gap: 10px; margin-bottom: 15px; align-items: flex-start;">
+    <img src="rensyuu.jpg" alt="チラシトレース" class="zoom-img" style="width: 100%; height: auto; border-radius: 4px; cursor: pointer; transition: 0.3s;">
+  </div>
+  
+  <h3 style="font-size: 1rem; margin-bottom: 5px;">既存デザインのトレース・模写</h3>
+  <p style="font-size: 0.85rem; color: #666; margin-bottom: 12px;">Tool: Illustrator</p>
+  
+  <div style="font-size: 0.8rem; color: #777; line-height: 1.6; border-top: 1px solid #eee; padding-top: 10px;">
+    <p style="margin-bottom: 8px;">
+      <strong>【対象】</strong><br>
+      大阪・梅田「HEP FIVE」開業25周年記念イベント<br>「HEP FIVE FESTIVALOON」告知ポスター
+    </p>
+    
+    <p style="margin-bottom: 8px;">
+      <strong>【学習目的】</strong><br>
+      ・Illustratorの3D機能を用いた立体的な文字表現の習得<br>
+      ・ポップな配色パターンの分析
+    </p>
+    
+    <p style="font-size: 0.75rem; color: #999;">
+      参照：<a href="https://www.instagram.com/p/CzFnPCrvrzD/" target="_blank" style="color: inherit; text-decoration: underline;">Instagram公式投稿</a>
+    </p>
+  </div>
+</div>
+
+
+<div class="archive-item" style="background: #fff; padding: 15px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); overflow: hidden;">
+  <p style="font-size: 0.7rem; color: #888; margin-bottom: 5px; text-align: right;">※画像タップで拡大</p>
+  
+  <div style="display: flex; gap: 10px; margin-bottom: 15px; align-items: flex-start;">
+    <img src="eiga.jpg" alt="映画告知ポスター制作" class="zoom-img" style="width: 100%; height: auto; border-radius: 4px; cursor: pointer; transition: 0.3s;">
+  </div>
+  
+  <h3 style="font-size: 1rem; margin-bottom: 5px;">架空映画ポスター「影が君を喰らう時」</h3>
+  <p style="font-size: 0.85rem; color: #666; margin-bottom: 12px;">Tool: Photoshop</p>
+  
+  <div style="font-size: 0.8rem; color: #777; line-height: 1.6; border-top: 1px solid #eee; padding-top: 10px;">
+    <p style="margin-bottom: 8px;">
+      <strong>【概要】</strong><br>
+      職業訓練での第一作目。ダークファンタジー映画を想定し、人物と背景、そして「意志を持つ影」の合成に挑戦しました。
+    </p>
+    
+    <p style="margin-bottom: 8px;">
+      <strong>【こだわり】</strong><br>
+      レイヤーマスクによる複雑な切り抜きと、光の加減を調整して不穏な空気感を作る技術を習得した、自身のデザインの原点となる作品です。
+    </p>
+  </div>
+</div>
+
+
+</div>
+
+
+
+      <div class="archive-item" style="background: #fff; padding: 15px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
+        <div style="width: 100%; height: 200px; background: #eee; display: flex; align-items: center; justify-content: center; border-radius: 4px; margin-bottom: 15px;">
+          <span>Coming Soon / 課題作品</span>
+        </div>
+        <h3 style="font-size: 1rem; margin-bottom: 5px;">ロゴ制作演習</h3>
+        <p style="font-size: 0.85rem; color: #666;">Tool: Illustrator</p>
+      </div>
+
+    </div> <div style="text-align: center; margin-top: 60px;">
+      <a href="index.html#works" class="back-to-top-link" style="color: var(--main-color); font-weight: bold; text-decoration: none;">← トップページの制作実績に戻る</a>
+    </div>
+  </section>
+</main>
+
+<footer>
+    <p>© 2026 Tomohiro Morita</p>
+</footer>
+
+<div id="imageModal" class="modal" onclick="this.style.display='none'">
+    <img id="modalImg">
+</div>
+
+<button id="back-to-top" onclick="scrollToTop()">↑</button>
+
+<script>
+    // 拡大処理
+    const images = document.querySelectorAll('.zoom-img');
+    const modal = document.getElementById('imageModal');
+    const modalImg = document.getElementById('modalImg');
+
+    images.forEach(img => {
+        img.onclick = function() {
+            modal.style.display = "flex";
+            modalImg.src = this.src;
+        }
+    });
+
+    // スクロールでボタンを表示
+    window.onscroll = function() {
+        const btn = document.getElementById("back-to-top");
+        if (document.body.scrollTop > 300 || document.documentElement.scrollTop > 300) {
+            btn.style.display = "flex";
+        } else {
+            btn.style.display = "none";
+        }
+    };
+
+    function scrollToTop() {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+</script>
+
+</body>
+</html>

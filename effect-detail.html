@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>制作解説 | After Effects 文字エフェクト</title>
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    /* 追加：トップへ戻るボタンのスタイル */
+    #back-to-top {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      width: 50px;
+      height: 50px;
+      background-color: #f0ad4e; /* オレンジ色 */
+      color: white;
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+      display: none; /* 初期は非表示 */
+      z-index: 9999;
+      transition: all 0.3s ease;
+      display: flex; /* 中央揃え */
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+    }
+    #back-to-top:hover {
+      transform: scale(1.1);
+      background-color: #ec971f;
+    }
+
+    /* 既存のレイアウト微調整 */
+    .detail-main { padding-bottom: 60px; }
+    .points-list { padding-left: 20px; }
+    .points-list li { margin-bottom: 20px; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <h1><a href="index.html" style="text-decoration: none; color: inherit;">Atelier MoRITA</a></h1>
+    <nav>
+      <ul>
+        <li><a href="index.html#works">Back to Works</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<main class="detail-main">
+  <section class="work-intro">
+    <div class="container" style="max-width: 900px; margin: 0 auto; padding: 40px 20px;">
+      <h2>After Effects 文字エフェクト制作解説</h2>
+      <p class="work-category" style="color: #d4a373; font-weight: bold;">Motion Graphics / VFX</p>
+      
+      <div class="detail-hero">
+        <video id="effect-video" src="mojieffect.mp4" controls autoplay loop muted playsinline width="100%" style="border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);">
+        </video>
+      </div>
+
+      <div class="detail-content" style="background: #fff; padding: 30px; border-radius: 12px; margin-top: 30px; box-shadow: 0 5px 15px rgba(0,0,0,0.05);">
+        <div class="detail-section">
+          <h3 style="border-left: 4px solid #d4a373; padding-left: 15px;">制作の狙い</h3>
+          <p>視聴者の視覚を刺激し、情報の印象を強めるための「グリッチ」「ネオン」「パーティクル」エフェクトの構築。独学で習得した技術を組み合わせ、実戦的な演出を目指しました。</p>
+        </div>
+
+        <div class="detail-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin: 30px 0;">
+          <div class="detail-box">
+            <h4 style="margin-bottom: 5px; color: #d4a373;">制作時期</h4>
+            <p>2026年3月</p>
+          </div>
+          <div class="detail-box">
+            <h4 style="margin-bottom: 5px; color: #d4a373;">使用ツール</h4>
+            <p>After Effects / Illustrator</p>
+          </div>
+          <div class="detail-box">
+            <h4 style="margin-bottom: 5px; color: #d4a373;">制作のポイント</h4>
+            <p>エクスプレッションによる自動化</p>
+          </div>
+        </div>
+
+        <hr style="border: 0; border-top: 1px solid #eee; margin: 30px 0;">
+
+        <div class="detail-section">
+          <h3 style="border-left: 4px solid #d4a373; padding-left: 15px;">技術的なこだわり</h3>
+          <ul class="points-list">
+             <li>
+              <strong>「シャキーン」と輝く金属光沢：</strong>
+              ベベルとエンボスで立体感を出し、CC Light Sweepで光の走りを表現しました。
+            </li>
+             <li>
+              <strong>Pixel Pollyによる粉砕演出：</strong>
+              GravityとForceを調整し、衝撃の強さと破片の落下をシミュレーションしました。
+            </li>
+            <li>
+              <strong>ディスプレイスメントマップによるグリッチ：</strong>
+              フラクタルノイズをマップに使用し、リアリティのあるデジタルエラーを再現しました。
+            </li>
+            <li>
+              <strong>ネオン風アニメーション：</strong>
+              グローと不透明度のwiggleエクスプレッションで、点灯のゆらぎを表現。
+            </li>
+            <li>
+              <strong>パスのトリミングによる手書き演出：</strong>
+              筆圧を感じさせるイージングにこだわり、文字が書かれる速度を調整しています。
+            </li>
+            <li>
+              <strong>バウンドエクスプレッション：</strong>
+              物理法則に基づいた弾み（OverShoot）をコードで制御し、自然な重力を表現しました。
+            </li>
+          </ul>
+        </div>
+
+        <div class="detail-section" style="margin-top: 40px;">
+          <h3 style="border-left: 4px solid #d4a373; padding-left: 15px;">制作プロセス</h3>
+          <p>
+            1. Illustratorでベースとなるタイポグラフィを作成。<br>
+            2. After Effectsにインポートし、シェイプレイヤーへ変換。<br>
+            3. 各種エフェクトを重ね、wiggleエクスプレッション等でランダムな動きを付与。<br>
+            4. 1フレーム単位での微調整を行い、視認性を損なわない程度の「バグ感」を演出。
+          </p>
+        </div>
+      </div>
+
+      <div class="back-link" style="text-align: center; margin-top: 40px;">
+        <a href="index.html#works" class="btn" style="text-decoration: none; color: #d4a373; font-weight: bold;">← 作品一覧に戻る</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <p style="text-align: center; padding: 40px 0; color: #888;">© 2026 Kimihiro Morita</p>
+</footer>
+
+<button id="back-to-top" onclick="scrollToTop()">↑</button>
+
+<script>
+  // 1. トップへ戻るボタンの表示制御
+  window.onscroll = function() {
+    const btn = document.getElementById("back-to-top");
+    if (document.body.scrollTop > 300 || document.documentElement.scrollTop > 300) {
+      btn.style.display = "flex";
+    } else {
+      btn.style.display = "none";
+    }
+  };
+
+  function scrollToTop() {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth"
+    });
+  }
+
+  // 2. 戻ってきた時の動画自動再生（黒い画面対策）
+  window.onpageshow = function() {
+    const video = document.getElementById('effect-video');
+    if (video) {
+      video.play().catch(error => {
+        console.log("Auto-play was prevented.");
+      });
+    }
+  };
+</script>
+
+</body>
+</html>
