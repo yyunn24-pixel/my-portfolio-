@@ -1,4 +1,3 @@
-YAML
 name: Hello Robot
 on: [push]
 
