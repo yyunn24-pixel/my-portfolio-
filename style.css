@@ -211,7 +211,7 @@ h2 {
 .work-detail strong, .work-specs strong {
   color: var(--main-color);
   display: inline-block;
-  width: 100px; /* 項目名を揃えると格段に見やすくなります */
+  width: 0px; /* 項目名を揃えると格段に見やすくなります */
 }
 
 video {
