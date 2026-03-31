@@ -1,0 +1,10 @@
+YAML
+name: Hello Robot
+on: [push]
+
+jobs:
+  say-hello:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Greet
+        run: echo "アンナさんの動画、無事に届いたよ！作業お疲れ様！"
