@@ -79,3 +79,32 @@ window.addEventListener('pageshow', function() {
         });
     }
 </script>
+
+
+document.addEventListener('DOMContentLoaded', () => {
+  const gifTriggers = document.querySelectorAll('.gif-trigger');
+
+  gifTriggers.forEach(img => {
+    // 静止画のパスを保存
+    const staticSrc = img.src;
+    // GIFのパスを取得
+    const gifSrc = img.getAttribute('data-gif');
+
+    // 画像をクリックした時の処理
+    img.addEventListener('click', function() {
+      if (this.src.includes('.gif')) {
+        this.src = staticSrc; // GIFなら静止画に戻す
+      } else {
+        this.src = gifSrc;    // 静止画ならGIFに変える
+      }
+    });
+
+    // パソコン用のホバー処理（お好みで残す）
+    img.addEventListener('mouseenter', function() {
+      this.src = gifSrc;
+    });
+    img.addEventListener('mouseleave', function() {
+      this.src = staticSrc;
+    });
+  });
+});

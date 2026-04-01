@@ -19,7 +19,7 @@ body {
   line-height: 1.8; /* 行間を広くして読みやすく */
   color: var(--text-color);
   background-color: var(--bg-color);
-  word-break: break-all;
+  overflow-wrap: break-word; /* 単語の区切りで改行するようにする */
 }
 
 /* --- ヘッダー --- */
@@ -165,6 +165,11 @@ h2 {
   margin-top: 0; /* ★ 60px を 0 に修正 */
 }
 
+
+.works-items {
+    text-align: left;
+  }
+
 .works-items h3 {
   text-align: center;
   display: block;
@@ -176,7 +181,14 @@ h2 {
   letter-spacing: 0.05em;
   line-height: 1.5;
   color: var(--main-color);
+
+  /* --- ここから追加 --- */
+  word-break: keep-all;     /* 単語の途中（文節）での改行を防ぐ */
+  overflow-wrap: anywhere;  /* 枠からはみ出しそうな時だけ改行を許可する */
+  /* --- ここまで追加 --- */
+  
 }
+
 
 
 /* 動画・画像エリア */
@@ -211,7 +223,7 @@ h2 {
 .work-detail strong, .work-specs strong {
   color: var(--main-color);
   display: inline-block;
-  width: 0px; /* 項目名を揃えると格段に見やすくなります */
+  width: px; /* 項目名を揃えると格段に見やすくなります */
 }
 
 video {
@@ -255,9 +267,11 @@ footer {
 
 /* --- レスポンシブ (スマホ対応) --- */
 @media (max-width: 768px) {
-  .header-inner {
+  .profile-basic {
     flex-direction: column;
-    text-align: center;
+    align-items: center;
+    /* text-align: center;  ←これを削除または left に変更 */
+    text-align: left; 
   }
   
   nav li {
